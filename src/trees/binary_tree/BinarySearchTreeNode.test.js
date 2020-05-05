@@ -250,44 +250,66 @@ describe('2nd level child with alternative branch', () => {
 });
 
 function createTestTree1() {
-  const nodes = [1,2,3,4].map(i => createNode(i));
+  //   1
+  //  / \
+  // 0   3
+  //    /
+  //   2
 
-  const root = nodes[2];
+  const nodes = [0,1,2,3].map(i => createNode(i));
 
-  root.setLeft(node[1]);
+  const root = nodes[1];
 
-  node[4].setLeft(node[3]);
-  root.setRight(node[4]);
+  root.setLeft(nodes[0]);
+  root.setRight(nodes[3]);
 
-  const bottom = createNode(3);
-
-  const right = createNode(4);
-  right.setLeft(bottom);
-  root.setRight(right);
+  nodes[3].setLeft(nodes[2]);
 
   return nodes;
 }
 
 describe('Node search', () => {
   const nodes = createTestTree1();
-  const root = nodes[2];
+  const root = nodes[1];
 
-  testFind(root, 2, root);
-  testFind(nodes[1], 2, null);
-  testFind(root, 1, nodes[1]);
-  testFind(root, 4, nodes[4]);
+  testFind(root, 1, root);
+  testFind(nodes[0], 2, null);
+  testFind(root, 0, nodes[0]);
   testFind(root, 3, nodes[3]);
+  testFind(root, 2, nodes[2]);
 });
 
-function testRemove(root, value, treeStr) {
-  test(`${getNodeAlias(root)}.remove(${value}) leaves tree ${treeStr}`, () => {
+function expectLink(parent, edge, child) {
+  expect(parent[edge]).toBe(child);
+  if (!child) return;
+  expect(child.parent).toBe(parent);
+}
+
+function testLinkNodeRemoval(root, value, parent, edge, child) {
+  test(`${getNodeAlias(root)}.remove(${value})`, () => {
     root.remove(value);
-    expect(root.toString()).toBe(treeStr);
+
+    expectLink(parent, edge, child);
   })
 }
 
 describe('Node removal', () => {
-  testRemove(createTestTree1()[2], 1, '2,3,4');
-  testRemove(createTestTree1()[2], 2, '1,3,4');
-  testRemove(createTestTree1()[4], 3, '1,2,4');
+  let nodes = createTestTree1();
+
+  testLinkNodeRemoval(nodes[1], 1, nodes[3], 'left', nodes[0]);
+
+  nodes = createTestTree1();
+  testLinkNodeRemoval(nodes[1], 0, nodes[1], 'left');
+
+  nodes = createTestTree1();
+  testLinkNodeRemoval(nodes[1], 2, nodes[1], 'right', nodes[3]);
+
+  nodes = createTestTree1();
+  testLinkNodeRemoval(nodes[1], 3, nodes[2], 'left');
+
+  test('1 node tree node removal', () => {
+    const node = createNode(1);
+    node.remove(1);
+    expect(node.value).toBeUndefined()
+  })
 });
