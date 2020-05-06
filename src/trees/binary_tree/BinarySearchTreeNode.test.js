@@ -268,6 +268,25 @@ function createTestTree1() {
   return nodes;
 }
 
+function createTestTree2() {
+  //   1
+  //  / \
+  // 0   2
+  //      \
+  //       3
+
+  const nodes = [0,1,2,3].map(i => createNode(i));
+
+  const root = nodes[1];
+
+  root.setLeft(nodes[0]);
+  root.setRight(nodes[2]);
+
+  nodes[2].setRight(nodes[3]);
+
+  return nodes;
+}
+
 describe('Node search', () => {
   const nodes = createTestTree1();
   const root = nodes[1];
@@ -285,27 +304,50 @@ function expectLink(parent, edge, child) {
   expect(child.parent).toBe(parent);
 }
 
-function testLinkNodeRemoval(root, value, parent, edge, child) {
-  test(`${getNodeAlias(root)}.remove(${value})`, () => {
-    root.remove(value);
-
-    expectLink(parent, edge, child);
-  })
-}
-
 describe('Node removal', () => {
-  let nodes = createTestTree1();
 
-  testLinkNodeRemoval(nodes[1], 1, nodes[3], 'left', nodes[0]);
+  test('Remove top node with left grandchild', () => {
+    const nodes = createTestTree1();
+    nodes[1].remove(1);
+    expect(nodes[1].value).toBe(2);
+    expect(nodes[3].left).toBeNull();
+    expect(nodes[2].parent).toBeNull();
+  });
 
-  nodes = createTestTree1();
-  testLinkNodeRemoval(nodes[1], 0, nodes[1], 'left');
+  test('Remove top node with no left grand child', () => {
+    const nodes = createTestTree2();
+    nodes[1].remove(1);
+    expect(nodes[1].value).toBe(2);
+    expectLink(nodes[1], 'right', nodes[3]);
+  });
 
-  nodes = createTestTree1();
-  testLinkNodeRemoval(nodes[1], 2, nodes[1], 'right', nodes[3]);
+  test('Remove node with only left child', () => {
+    const nodes = createTestTree1();
+    nodes[1].remove(3);
+    expectLink(nodes[1], 'right', nodes[2]);
+  });
 
-  nodes = createTestTree1();
-  testLinkNodeRemoval(nodes[1], 3, nodes[2], 'left');
+  test('Remove node with only right child', () => {
+    const nodes = createTestTree2();
+    nodes[1].remove(2);
+    expectLink(nodes[1], 'right', nodes[3]);
+  });
+
+
+  test('Remove top node which has only child', () => {
+    const root = createNode(0);
+    const right = createNode(2);
+    right.setLeft(createNode(1));
+    right.setRight(createNode(3));
+    root.setRight(right);
+
+    root.remove(0);
+    expect(root.value).toBe(right.value);
+    expect(root.left).toBe(right.left);
+    expect(root.right).toBe(right.right);
+    expect(root.parent).toBeNull();
+  });
+
 
   test('1 node tree node removal', () => {
     const node = createNode(1);
