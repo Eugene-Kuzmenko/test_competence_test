@@ -304,6 +304,17 @@ function expectLink(parent, edge, child) {
   expect(child.parent).toBe(parent);
 }
 
+describe('findMin', () => {
+  const nodes = createTestTree2();
+  test('has left node', () => {
+    expect(nodes[1].findMin()).toBe(nodes[0])
+  });
+  test('has no left nodes', () => {
+    expect(nodes[2].findMin()).toBe(nodes[2])
+  });
+
+});
+
 describe('Node removal', () => {
 
   test('Remove top node with left grandchild', () => {
@@ -355,3 +366,27 @@ describe('Node removal', () => {
     expect(node.value).toBeUndefined()
   })
 });
+
+describe('Node insert', () => {
+
+  test('Insert value same as root value', () => {
+    const nodes = createTestTree1();
+    nodes[1].insert(1);
+    expect(nodes[1].value).toBe(1);
+  });
+
+  test('Insert lowest value', () => {
+    const nodes = createTestTree2();
+    nodes[1].insert(-1);
+    expect(nodes[0].left).not.toBeNull();
+    expect(nodes[0].left.value).toBe(-1);
+  });
+
+  test('Insert lowest value', () => {
+    const nodes = createTestTree1();
+    nodes[1].insert(5);
+    expect(nodes[3].right).not.toBeNull();
+    expect(nodes[3].right.value).toBe(5);
+  });
+});
+
