@@ -1,6 +1,14 @@
 import BinarySearchTreeNode from './BinarySearchTreeNode';
 
-const createNode = value => new BinarySearchTreeNode(value);
+const createNode = (value, compareFunc) => new BinarySearchTreeNode(value, compareFunc);
+
+test('Create search node', () => {
+  const val = 5;
+  const func = () => {};
+  const node = createNode(val, func);
+  expect(node.compareFunction).toBe(func);
+  expect(node.nodeValueComparator.compare).toBe(func)
+});
 
 function testHeight(node, height, leftHeight, rightHeight, balanceFactor) {
   test(`Node height should be ${height}`, () => {
@@ -389,4 +397,5 @@ describe('Node insert', () => {
     expect(nodes[3].right.value).toBe(5);
   });
 });
+
 
