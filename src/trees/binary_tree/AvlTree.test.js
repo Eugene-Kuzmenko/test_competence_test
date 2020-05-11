@@ -3,48 +3,6 @@ import BinarySearchTreeNode from './BinarySearchTreeNode';
 
 const createNode = (value, compareFunc) => new BinarySearchTreeNode(value, compareFunc);
 
-function createTestTree1() {
-  //   1
-  //  / \
-  // 0   3
-  //    /
-  //   2
-
-  const tree = new AvlTree();
-  tree.root.value = 1;
-
-  const nodes = [0,1,2,3].map(i => i === 1 ? tree.root : createNode(i));
-
-  tree.root.setLeft(nodes[0]);
-  tree.root.setRight(nodes[3]);
-
-  nodes[3].setLeft(nodes[2]);
-
-  return { tree, nodes };
-}
-
-function createTestTree2() {
-    //   1
-    //  / \
-    // 0   2
-    //      \
-    //       3
-
-    const tree = new AvlTree();
-    tree.root.value = 1;
-
-    const nodes = [0,1,2,3].map(i => i === 1 ? tree.root : createNode(i));
-
-    const root = nodes[1];
-
-    root.setLeft(nodes[0]);
-    root.setRight(nodes[2]);
-
-    nodes[2].setRight(nodes[3]);
-
-    return { tree, nodes };
-}
-
 function createTestTree3() {
   //   1
   //  / \
@@ -299,3 +257,106 @@ describe('Rotate right left', () => {
   });
 });
 
+function testChildValue(node, branch, value) {
+  if (value == null) {
+    expect(node[branch]).toBeNull();
+    return;
+  }
+  expect(node[branch].value).toBe(value);
+}
+
+function testNodeValues(tree, parentValue, leftValue, rightValue) {
+  const node = tree.root.find(parentValue);
+  testChildValue(node, 'left', leftValue);
+  testChildValue(node, 'right', rightValue);
+}
+
+describe('Balance', () => {
+  test('Left sided', () => {
+    const { tree } = createTestTree8();
+    tree.balance(tree.root);
+    //        5               3
+    //       / \             / \
+    //      3   6           1   5
+    //     / \        =>   /\   /\
+    //    1   4           0  2 4  6
+    //   / \
+    //  0   2
+
+
+    testNodeValues(tree, 3, 1, 5);
+    testNodeValues(tree, 1, 0, 2);
+    testNodeValues(tree, 5, 4, 6);
+  });
+
+  test('Right sided', () => {
+    const { tree } = createTestTree8();
+    tree.balance(tree.root);
+    //   1               2
+    //  / \             / \
+    // 0   3           1   5
+    //    / \    =>   /\   /\
+    //   2   5       0  2 4  6
+    //      / \
+    //     4   6
+
+
+    testNodeValues(tree, 3, 1, 5);
+    testNodeValues(tree, 1, 0, 2);
+    testNodeValues(tree, 5, 4, 6);
+  });
+
+  test('Twisted', () => {
+    const { tree } = createTestTree8();
+    tree.balance(tree.root);
+    //    1              3
+    //   / \            / \
+    //  0   5          1   5
+    //     / \   =>   /\   /\
+    //    3   6      0  2 4  6
+    //   / \
+    //  2   4
+
+
+    testNodeValues(tree, 3, 1, 5);
+    testNodeValues(tree, 1, 0, 2);
+    testNodeValues(tree, 5, 4, 6);
+  });
+
+});
+
+
+test('Remove node', () => {
+  const { tree } = createTestTree8();
+  //    1              4
+  //   / \            / \
+  //  0   5          1   5
+  //     / \   =>   /\    \
+  //    3   6      0  2    6
+  //   / \
+  //  2   4
+
+  tree.remove(3);
+
+  testNodeValues(tree, 4, 1, 5);
+  testNodeValues(tree, 1, 0, 2);
+  testNodeValues(tree, 5, null, 6);
+});
+
+test('insert node', () => {
+  const { tree } = createTestTree8();
+  //    1              3
+  //   / \            / \
+  //  0   5          1   3.5
+  //     / \   =>   /\     \
+  //    3   6      0  2     5
+  //   / \                 / \
+  //  2   4               4   6
+
+  tree.insert(3.5);
+
+  testNodeValues(tree, 3, 1, 3.5);
+  testNodeValues(tree, 1, 0, 2);
+  testNodeValues(tree, 3.5, null, 5);
+  testNodeValues(tree, 5, 4, 5);
+});
